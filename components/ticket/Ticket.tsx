@@ -8,6 +8,12 @@ type TicketProps = {
   ticketId: string | null;
 };
 
+// Matches the ticket-notches mask in globals.css: 760 x 300 ticket, 14px corner
+// radius, 14px notches centered 209px from the right edge.
+const CUT_LINE =
+  "M14 0H537A14 14 0 0 0 565 0H746A14 14 0 0 1 760 14V286A14 14 0 0 1 746 300" +
+  "H565A14 14 0 0 0 537 300H14A14 14 0 0 1 0 286V14A14 14 0 0 1 14 0Z";
+
 const metaLabel =
   "font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-ticket-muted";
 const metaValue = "mt-1 truncate text-sm font-semibold";
@@ -23,6 +29,13 @@ function orPlaceholder(value: string, placeholder: string, display = value) {
 export default function Ticket({ event, attendee, ticketId }: TicketProps) {
   return (
     <article className="ticket-notches relative flex h-[300px] w-[760px] shrink-0 rounded-ticket bg-ticket-paper font-sans text-ticket-ink">
+      <svg
+        aria-hidden
+        viewBox="0 0 760 300"
+        className="pointer-events-none absolute inset-0 hidden size-full overflow-visible print:block"
+      >
+        <path d={CUT_LINE} fill="none" strokeWidth={0.5} className="stroke-ticket-muted" />
+      </svg>
       <div className="w-2.5 rounded-l-ticket bg-ticket-accent" />
 
       <div className="flex min-w-0 flex-1 flex-col px-8 py-7">

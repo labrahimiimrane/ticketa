@@ -1,4 +1,4 @@
-import puppeteer, { type Browser } from "puppeteer";
+import puppeteer, { type Browser, type Page } from "puppeteer";
 
 import type { ExportRequest } from "@/lib/export/export-request";
 
@@ -13,14 +13,33 @@ function renderOrigin(): string {
 }
 
 /** Renders the ticket with the app's own render page and returns PNG bytes at 3x. */
-export async function renderTicketPng(data: ExportRequest): Promise<Uint8Array> {
+export function renderTicketPng(data: ExportRequest): Promise<Uint8Array> {
+  return withRenderedTicket(data, "PNG", async (page) => {
+    const ticket = await page.$("[data-render-root] article");
+    if (!ticket) throw new Error("Rendered ticket not found");
+    return ticket.screenshot({ type: "png", omitBackground: true });
+  });
+}
+
+/** Renders the ticket centered at true size on one A4 landscape page. */
+export function renderTicketPdf(data: ExportRequest): Promise<Uint8Array> {
+  return withRenderedTicket(data, "PDF", (page) =>
+    page.pdf({ format: "A4", landscape: true, printBackground: true, preferCSSPageSize: true }),
+  );
+}
+
+async function withRenderedTicket<T>(
+  data: ExportRequest,
+  format: string,
+  use: (page: Page) => Promise<T>,
+): Promise<T> {
   // The deadline covers launching Chrome too, not just the page work.
   let timer: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error("PNG render timed out")), TIMEOUT_MS);
+    timer = setTimeout(() => reject(new Error(`${format} render timed out`)), TIMEOUT_MS);
   });
   const launching = puppeteer.launch({ headless: true, timeout: TIMEOUT_MS });
-  const rendering = launching.then((browser) => screenshotTicket(browser, data));
+  const rendering = launching.then((browser) => openTicketPage(browser, data)).then(use);
 
   try {
     return await Promise.race([rendering, deadline]);
@@ -37,7 +56,7 @@ export async function renderTicketPng(data: ExportRequest): Promise<Uint8Array> 
   }
 }
 
-async function screenshotTicket(browser: Browser, data: ExportRequest): Promise<Uint8Array> {
+async function openTicketPage(browser: Browser, data: ExportRequest): Promise<Page> {
   const origin = renderOrigin();
   const page = await browser.newPage();
   page.setDefaultTimeout(TIMEOUT_MS);
@@ -55,8 +74,5 @@ async function screenshotTicket(browser: Browser, data: ExportRequest): Promise<
   await page.evaluate((ticket) => window.__renderTicket?.(ticket), data);
   await page.waitForSelector('[data-ready="true"] article');
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
-
-  const ticket = await page.$("[data-render-root] article");
-  if (!ticket) throw new Error("Rendered ticket not found");
-  return ticket.screenshot({ type: "png", omitBackground: true });
+  return page;
 }

@@ -96,7 +96,7 @@
 
 /* Ticket notches are cut out of the ticket itself (not painted), so they stay
    transparent in exports. Centered on the stub's 2px perforation, 209px from
-   the right edge. */
+   the right edge. The print cut line in Ticket.tsx uses the same geometry. */
 @utility ticket-notches {
   --notch-x: calc(100% - 209px);
   mask:
@@ -107,4 +107,31 @@
 /* The export render page draws only the ticket, on a transparent page. */
 body:has([data-render-root]) {
   background: transparent;
+}
+
+/* PDF export: one A4 landscape page with the ticket centered at true size.
+   Printing drops the mask (Chrome may rasterize masked content) and relies on
+   the ticket's print-only cut line instead. */
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+@media print {
+  /* The app's dark color scheme would otherwise print a dark page. */
+  html:has([data-render-root]) {
+    color-scheme: light;
+    background: white;
+  }
+
+  [data-render-root] {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .ticket-notches {
+    mask: none;
+  }
 }
