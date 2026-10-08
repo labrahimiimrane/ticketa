@@ -9,10 +9,9 @@ const formatter = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-/** Formats "2026-11-14" as "Sat, 14 Nov 2026"; returns invalid input unchanged. */
-export function formatTicketDate(isoDate: string): string {
+function parseIsoDate(isoDate: string): Date | null {
   const match = ISO_DATE.exec(isoDate);
-  if (!match) return isoDate;
+  if (!match) return null;
 
   const [, year, month, day] = match.map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));
@@ -21,5 +20,16 @@ export function formatTicketDate(isoDate: string): string {
     date.getUTCMonth() === month - 1 &&
     date.getUTCDate() === day;
 
-  return isRealDate ? formatter.format(date) : isoDate;
+  return isRealDate ? date : null;
+}
+
+/** True for a "YYYY-MM-DD" string naming a real calendar date. */
+export function isValidIsoDate(isoDate: string): boolean {
+  return parseIsoDate(isoDate) !== null;
+}
+
+/** Formats "2026-11-14" as "Sat, 14 Nov 2026"; returns invalid input unchanged. */
+export function formatTicketDate(isoDate: string): string {
+  const date = parseIsoDate(isoDate);
+  return date ? formatter.format(date) : isoDate;
 }
