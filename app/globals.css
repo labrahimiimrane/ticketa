@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Ported from prototypes/theme.css. The app shell is dark; the ticket keeps its
+   own bright, print-friendly palette so exports match the preview. */
+@theme {
+  --color-bg: #09090b;
+  --color-surface: #111114;
+  --color-surface-raised: #18181c;
+  --color-canvas: #0c0c0f;
+  --color-border: #26262c;
+  --color-border-strong: #34343c;
+
+  --color-text: #ededf0;
+  --color-muted: #9a9aa5;
+  --color-faint: #5c5c66;
+
+  --color-accent: #8b5cf6;
+  --color-accent-hover: #9d74f8;
+  --color-accent-ink: #ffffff;
+
+  --color-danger: #f2555a;
+  --color-success: #3ecf8e;
+
+  --color-ticket-paper: #ffffff;
+  --color-ticket-ink: #111114;
+  --color-ticket-muted: #6b6b76;
+  --color-ticket-rule: #e4e4ea;
+  --color-ticket-accent: #8b5cf6;
+  --color-ticket-accent-ink: #ffffff;
+
+  --radius-ticket: 14px;
+  --shadow-ticket: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
 }
