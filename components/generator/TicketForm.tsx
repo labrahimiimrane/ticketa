@@ -16,6 +16,8 @@ type FieldKey = `${Section}.${string}`;
 type TicketFormProps = {
   values: TicketFormValues;
   onChange: (values: TicketFormValues) => void;
+  /** Show every field's error as if touched, for example after a blocked export. */
+  showAllErrors?: boolean;
 };
 
 function firstErrors(
@@ -31,7 +33,7 @@ function firstErrors(
   return errors;
 }
 
-export default function TicketForm({ values, onChange }: TicketFormProps) {
+export default function TicketForm({ values, onChange, showAllErrors = false }: TicketFormProps) {
   const [touched, setTouched] = useState<Set<FieldKey>>(() => new Set());
 
   const errors = new Map([
@@ -49,7 +51,7 @@ export default function TicketForm({ values, onChange }: TicketFormProps) {
     const key: FieldKey = `${section}.${name}`;
     const id = `field-${section}-${name}`;
     const errorId = `${id}-error`;
-    const error = touched.has(key) ? errors.get(key) : undefined;
+    const error = showAllErrors || touched.has(key) ? errors.get(key) : undefined;
     const value = (values[section][name] as string | undefined) ?? "";
 
     return (

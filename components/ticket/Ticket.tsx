@@ -22,7 +22,7 @@ function orPlaceholder(value: string, placeholder: string, display = value) {
 
 export default function Ticket({ event, attendee, ticketId }: TicketProps) {
   return (
-    <article className="relative flex h-[300px] w-[760px] shrink-0 rounded-ticket bg-ticket-paper font-sans text-ticket-ink shadow-ticket">
+    <article className="ticket-notches relative flex h-[300px] w-[760px] shrink-0 rounded-ticket bg-ticket-paper font-sans text-ticket-ink">
       <div className="w-2.5 rounded-l-ticket bg-ticket-accent" />
 
       <div className="flex min-w-0 flex-1 flex-col px-8 py-7">
@@ -55,16 +55,7 @@ export default function Ticket({ event, attendee, ticketId }: TicketProps) {
         </dl>
       </div>
 
-      <div className="relative flex w-[210px] shrink-0 flex-col items-center justify-between border-l-2 border-dashed border-ticket-rule px-[22px] py-6">
-        <span
-          aria-hidden
-          className="absolute -top-3.5 -left-[15px] size-7 rounded-full bg-canvas"
-        />
-        <span
-          aria-hidden
-          className="absolute -bottom-3.5 -left-[15px] size-7 rounded-full bg-canvas"
-        />
-
+      <div className="flex w-[210px] shrink-0 flex-col items-center justify-between border-l-2 border-dashed border-ticket-rule px-[22px] py-6">
         <div className="w-full text-center">
           <p className={metaLabel}>Attendee</p>
           <p className="mt-1 truncate text-[15px] font-semibold">{orPlaceholder(attendee.name, "Attendee name")}</p>

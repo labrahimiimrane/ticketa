@@ -5,6 +5,7 @@ import { useState } from "react";
 import TicketForm, { type TicketFormValues } from "@/components/generator/TicketForm";
 import Ticket from "@/components/ticket/Ticket";
 import { useTicketId } from "@/components/generator/use-ticket-id";
+import { attendeeInfoSchema, eventInfoSchema } from "@/lib/ticket-schema";
 
 const EMPTY_VALUES: TicketFormValues = {
   event: { name: "", date: "", time: "", location: "", organizer: "" },
@@ -14,6 +15,33 @@ const EMPTY_VALUES: TicketFormValues = {
 export default function Generator() {
   const [values, setValues] = useState(EMPTY_VALUES);
   const [ticketId, regenerateTicketId] = useTicketId();
+  const [showAllErrors, setShowAllErrors] = useState(false);
+  const [exportState, setExportState] = useState<"idle" | "exporting" | "error">("idle");
+
+  async function downloadPng() {
+    setExportState("idle");
+    const isValid =
+      eventInfoSchema.safeParse(values.event).success &&
+      attendeeInfoSchema.safeParse(values.attendee).success;
+    if (!isValid || !ticketId) {
+      setShowAllErrors(true);
+      return;
+    }
+
+    setExportState("exporting");
+    try {
+      const response = await fetch("/api/export/png", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: values.event, attendee: values.attendee, ticketId }),
+      });
+      if (!response.ok) throw new Error(`PNG export failed with ${response.status}`);
+      saveBlob(await response.blob(), `ticket-${ticketId}.png`);
+      setExportState("idle");
+    } catch {
+      setExportState("error");
+    }
+  }
 
   return (
     <div className="grid h-dvh grid-rows-[52px_1fr]">
@@ -25,15 +53,31 @@ export default function Generator() {
           T
         </span>
         <span className="text-base font-semibold tracking-[-0.01em]">Ticketa</span>
+        <div className="ml-auto flex items-center gap-3">
+          <p role="status" className="text-xs text-danger">
+            {exportState === "error" && "Couldn't create the PNG. Try again."}
+          </p>
+          <button
+            type="button"
+            onClick={downloadPng}
+            disabled={exportState === "exporting"}
+            aria-busy={exportState === "exporting"}
+            className="h-[34px] rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-wait disabled:opacity-70"
+          >
+            {exportState === "exporting" ? "Exporting…" : "Download PNG"}
+          </button>
+        </div>
       </header>
 
       <div className="grid min-h-0 grid-cols-[380px_1fr]">
         <aside className="overflow-y-auto border-r border-border bg-surface">
-          <TicketForm values={values} onChange={setValues} />
+          <TicketForm values={values} onChange={setValues} showAllErrors={showAllErrors} />
         </aside>
 
         <main className="grid min-h-0 place-content-center place-items-center gap-4 overflow-auto bg-canvas bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[20px_20px] p-8">
-          <Ticket event={values.event} attendee={values.attendee} ticketId={ticketId} />
+          <div className="drop-shadow-ticket">
+            <Ticket event={values.event} attendee={values.attendee} ticketId={ticketId} />
+          </div>
           <button
             type="button"
             onClick={regenerateTicketId}
@@ -45,4 +89,13 @@ export default function Generator() {
       </div>
     </div>
   );
+}
+
+function saveBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }

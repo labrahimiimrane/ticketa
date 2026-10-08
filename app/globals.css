@@ -33,7 +33,7 @@
   --color-ticket-accent-ink: #ffffff;
 
   --radius-ticket: 14px;
-  --shadow-ticket: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --drop-shadow-ticket: 0 30px 40px rgba(0, 0, 0, 0.55);
 }
 
 /* shadcn/ui semantic colors, mapped onto the theme above. `accent`, `muted`,
@@ -92,4 +92,19 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Ticket notches are cut out of the ticket itself (not painted), so they stay
+   transparent in exports. Centered on the stub's 2px perforation, 209px from
+   the right edge. */
+@utility ticket-notches {
+  --notch-x: calc(100% - 209px);
+  mask:
+    radial-gradient(circle at var(--notch-x) 0, transparent 14px, #000 14.5px) top / 100% 51% no-repeat,
+    radial-gradient(circle at var(--notch-x) 100%, transparent 14px, #000 14.5px) bottom / 100% 51% no-repeat;
+}
+
+/* The export render page draws only the ticket, on a transparent page. */
+body:has([data-render-root]) {
+  background: transparent;
 }
