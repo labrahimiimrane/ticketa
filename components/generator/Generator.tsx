@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 
+import TemplatePicker from "@/components/generator/TemplatePicker";
 import TicketForm, { type TicketFormValues } from "@/components/generator/TicketForm";
 import Ticket from "@/components/ticket/Ticket";
 import { useTicketId } from "@/components/generator/use-ticket-id";
 import { attendeeInfoSchema, eventInfoSchema } from "@/lib/ticket-schema";
+import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/lib/ticket-templates";
 
 type ExportFormat = "png" | "pdf";
 
@@ -22,6 +24,7 @@ const EMPTY_VALUES: TicketFormValues = {
 export default function Generator() {
   const [values, setValues] = useState(EMPTY_VALUES);
   const [ticketId, regenerateTicketId] = useTicketId();
+  const [templateId, setTemplateId] = useState<TemplateId>(DEFAULT_TEMPLATE_ID);
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [exportState, setExportState] = useState<ExportState>({ status: "idle" });
 
@@ -40,7 +43,12 @@ export default function Generator() {
       const response = await fetch(`/api/export/${format}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event: values.event, attendee: values.attendee, ticketId }),
+        body: JSON.stringify({
+          event: values.event,
+          attendee: values.attendee,
+          ticketId,
+          templateId,
+        }),
       });
       if (!response.ok) throw new Error(`${format} export failed with ${response.status}`);
       saveBlob(await response.blob(), `ticket-${ticketId}.${format}`);
@@ -91,11 +99,12 @@ export default function Generator() {
       <div className="grid min-h-0 grid-cols-[380px_1fr]">
         <aside className="overflow-y-auto border-r border-border bg-surface">
           <TicketForm values={values} onChange={setValues} showAllErrors={showAllErrors} />
+          <TemplatePicker value={templateId} onChange={setTemplateId} />
         </aside>
 
         <main className="grid min-h-0 place-content-center place-items-center gap-4 overflow-auto bg-canvas bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[20px_20px] p-8">
           <div className="drop-shadow-ticket">
-            <Ticket event={values.event} attendee={values.attendee} ticketId={ticketId} />
+            <Ticket templateId={templateId} event={values.event} attendee={values.attendee} ticketId={ticketId} />
           </div>
           <button
             type="button"

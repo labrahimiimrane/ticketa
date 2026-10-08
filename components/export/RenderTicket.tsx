@@ -34,7 +34,7 @@ export default function RenderTicket() {
 
   return (
     <div data-render-root data-ready={ready ? "true" : undefined} className="inline-block p-0">
-      {data && <Ticket event={data.event} attendee={data.attendee} ticketId={data.ticketId} />}
+      {data && <Ticket templateId={data.templateId} event={data.event} attendee={data.attendee} ticketId={data.ticketId} />}
     </div>
   );
 }

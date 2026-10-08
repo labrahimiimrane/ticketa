@@ -6,7 +6,7 @@
 - [x] 4. **QR code generation** - Generate a unique ticket identifier and display its QR code inside the ticket
 - [x] 5. **PNG export** - Render the ticket at high resolution and allow the user to download it as a PNG
 - [x] 6. **PDF export** - Render the same ticket as a print-ready PDF with the correct dimensions and margins
-- [ ] 7. **Template system** - Add multiple ticket designs with a shared theme system and a template picker
+- [x] 7. **Template system** - Add multiple ticket designs with a shared theme system and a template picker
 - [ ] 8. **Brand customization** - Add logo upload, organizer information, and customizable colors
 - [ ] 9. **Local persistence** - Save the user's settings, latest form values, and selected template in local storage
 - [ ] 10. **Ticket history** - Store generated tickets locally and allow users to reopen and regenerate them
