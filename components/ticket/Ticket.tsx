@@ -1,9 +1,11 @@
+import TicketQr from "@/components/ticket/TicketQr";
 import { formatTicketDate } from "@/lib/format-ticket-date";
 import type { AttendeeInfo, EventInfo } from "@/types/ticket";
 
 type TicketProps = {
   event: EventInfo;
   attendee: AttendeeInfo;
+  ticketId: string | null;
 };
 
 const metaLabel =
@@ -18,7 +20,7 @@ function orPlaceholder(value: string, placeholder: string, display = value) {
   );
 }
 
-export default function Ticket({ event, attendee }: TicketProps) {
+export default function Ticket({ event, attendee, ticketId }: TicketProps) {
   return (
     <article className="relative flex h-[300px] w-[760px] shrink-0 rounded-ticket bg-ticket-paper font-sans text-ticket-ink shadow-ticket">
       <div className="w-2.5 rounded-l-ticket bg-ticket-accent" />
@@ -68,16 +70,24 @@ export default function Ticket({ event, attendee }: TicketProps) {
           <p className="mt-1 truncate text-[15px] font-semibold">{orPlaceholder(attendee.name, "Attendee name")}</p>
         </div>
 
-        <div
-          role="img"
-          aria-label="QR code placeholder"
-          className="grid size-[118px] place-items-center rounded-md border-2 border-dashed border-ticket-rule font-mono text-xs text-ticket-muted"
-        >
-          QR
-        </div>
+        {ticketId ? (
+          <div className="size-[118px]">
+            <TicketQr value={ticketId} />
+          </div>
+        ) : (
+          <div
+            role="img"
+            aria-label="QR code placeholder"
+            className="grid size-[118px] place-items-center rounded-md border-2 border-dashed border-ticket-rule font-mono text-xs text-ticket-muted"
+          >
+            QR
+          </div>
+        )}
 
-        <p className="font-mono text-xs font-medium tracking-[0.06em] text-ticket-muted">
-          TICKET ID
+        <p
+          className={`font-mono text-xs font-medium tracking-[0.06em] ${ticketId ? "text-ticket-ink" : "text-ticket-muted"}`}
+        >
+          {ticketId ?? "TICKET ID"}
         </p>
       </div>
     </article>

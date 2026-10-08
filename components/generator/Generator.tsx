@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import TicketForm, { type TicketFormValues } from "@/components/generator/TicketForm";
 import Ticket from "@/components/ticket/Ticket";
+import { useTicketId } from "@/components/generator/use-ticket-id";
 
 const EMPTY_VALUES: TicketFormValues = {
   event: { name: "", date: "", time: "", location: "", organizer: "" },
@@ -12,6 +13,7 @@ const EMPTY_VALUES: TicketFormValues = {
 
 export default function Generator() {
   const [values, setValues] = useState(EMPTY_VALUES);
+  const [ticketId, regenerateTicketId] = useTicketId();
 
   return (
     <div className="grid h-dvh grid-rows-[52px_1fr]">
@@ -30,8 +32,15 @@ export default function Generator() {
           <TicketForm values={values} onChange={setValues} />
         </aside>
 
-        <main className="grid min-h-0 place-items-center overflow-auto bg-canvas bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[20px_20px] p-8">
-          <Ticket event={values.event} attendee={values.attendee} />
+        <main className="grid min-h-0 place-content-center place-items-center gap-4 overflow-auto bg-canvas bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[20px_20px] p-8">
+          <Ticket event={values.event} attendee={values.attendee} ticketId={ticketId} />
+          <button
+            type="button"
+            onClick={regenerateTicketId}
+            className="h-8 rounded-lg border border-border-strong bg-surface-raised px-3 text-sm font-medium text-text hover:border-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            New ticket ID
+          </button>
         </main>
       </div>
     </div>

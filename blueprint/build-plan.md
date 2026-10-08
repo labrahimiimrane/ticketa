@@ -3,7 +3,7 @@
 - [x] 1. **Ticket template** - Create the first professional, themeable ticket template with event, attendee, organizer, and QR code placeholders
 - [x] 2. **Event and attendee form** - Add inputs for event details and attendee information with validation
 - [x] 3. **Live ticket preview** - Bind the form data to the ticket template and update the preview instantly
-- [ ] 4. **QR code generation** - Generate a unique ticket identifier and display its QR code inside the ticket
+- [x] 4. **QR code generation** - Generate a unique ticket identifier and display its QR code inside the ticket
 - [ ] 5. **PNG export** - Render the ticket at high resolution and allow the user to download it as a PNG
 - [ ] 6. **PDF export** - Render the same ticket as a print-ready PDF with the correct dimensions and margins
 - [ ] 7. **Template system** - Add multiple ticket designs with a shared theme system and a template picker
