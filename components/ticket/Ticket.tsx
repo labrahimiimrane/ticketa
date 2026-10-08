@@ -10,6 +10,14 @@ const metaLabel =
   "font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-ticket-muted";
 const metaValue = "mt-1 truncate text-sm font-semibold";
 
+function orPlaceholder(value: string, placeholder: string, display = value) {
+  return value.trim() ? (
+    display
+  ) : (
+    <span className="text-ticket-muted">{placeholder}</span>
+  );
+}
+
 export default function Ticket({ event, attendee }: TicketProps) {
   return (
     <article className="relative flex h-[300px] w-[760px] shrink-0 rounded-ticket bg-ticket-paper font-sans text-ticket-ink shadow-ticket">
@@ -18,7 +26,7 @@ export default function Ticket({ event, attendee }: TicketProps) {
       <div className="flex min-w-0 flex-1 flex-col px-8 py-7">
         <div className="flex items-center justify-between gap-4">
           <p className="truncate text-xs font-semibold text-ticket-muted">
-            {event.organizer}
+            {orPlaceholder(event.organizer, "Organizer")}
           </p>
           <span className="shrink-0 rounded-full bg-ticket-accent px-2.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-ticket-accent-ink">
             Admit one
@@ -26,21 +34,21 @@ export default function Ticket({ event, attendee }: TicketProps) {
         </div>
 
         <h1 className="mt-5 line-clamp-2 text-[34px] leading-[1.05] font-bold tracking-[-0.03em]">
-          {event.name}
+          {orPlaceholder(event.name, "Event name")}
         </h1>
 
         <dl className="mt-auto grid grid-cols-[1.1fr_0.8fr_1.4fr] gap-5 border-t border-ticket-rule pt-[18px]">
           <div className="min-w-0">
             <dt className={metaLabel}>Date</dt>
-            <dd className={metaValue}>{formatTicketDate(event.date)}</dd>
+            <dd className={metaValue}>{orPlaceholder(event.date, "Date", formatTicketDate(event.date))}</dd>
           </div>
           <div className="min-w-0">
             <dt className={metaLabel}>Time</dt>
-            <dd className={metaValue}>{event.time}</dd>
+            <dd className={metaValue}>{orPlaceholder(event.time, "Time")}</dd>
           </div>
           <div className="min-w-0">
             <dt className={metaLabel}>Venue</dt>
-            <dd className={metaValue}>{event.location}</dd>
+            <dd className={metaValue}>{orPlaceholder(event.location, "Venue")}</dd>
           </div>
         </dl>
       </div>
@@ -57,7 +65,7 @@ export default function Ticket({ event, attendee }: TicketProps) {
 
         <div className="w-full text-center">
           <p className={metaLabel}>Attendee</p>
-          <p className="mt-1 truncate text-[15px] font-semibold">{attendee.name}</p>
+          <p className="mt-1 truncate text-[15px] font-semibold">{orPlaceholder(attendee.name, "Attendee name")}</p>
         </div>
 
         <div
