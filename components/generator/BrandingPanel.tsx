@@ -149,7 +149,7 @@ export default function BrandingPanel({ value, onLogoChange, onAccentChange }: B
 
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1.5 text-xs text-muted-foreground">Accent color</legend>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {PRESET_ACCENTS.map((preset) => (
             <label
               key={preset}
