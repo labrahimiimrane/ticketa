@@ -1,13 +1,14 @@
 import { z } from "zod";
 
 import { brandingSchema } from "@/lib/branding";
+import { TICKET_ID_PATTERN } from "@/lib/ticket-id";
 import { attendeeInfoSchema, eventInfoSchema } from "@/lib/ticket-schema";
 import { TEMPLATE_IDS } from "@/lib/ticket-templates";
 
 export const exportRequestSchema = z.object({
   event: eventInfoSchema,
   attendee: attendeeInfoSchema,
-  ticketId: z.string().regex(/^TKT-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/),
+  ticketId: z.string().regex(TICKET_ID_PATTERN),
   templateId: z.enum(TEMPLATE_IDS),
   branding: brandingSchema,
 });

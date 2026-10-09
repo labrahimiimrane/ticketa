@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 
 import BrandingPanel from "@/components/generator/BrandingPanel";
 import TemplatePicker from "@/components/generator/TemplatePicker";
+import TicketHistory from "@/components/generator/TicketHistory";
 import TicketForm, { type TicketFormValues } from "@/components/generator/TicketForm";
 import Ticket from "@/components/ticket/Ticket";
 import { type Branding } from "@/lib/branding";
 import { DEFAULT_LOCAL_STATE, type LocalState } from "@/lib/local-state";
 import { saveState, useSavedState, useSaveFailed } from "@/components/generator/use-saved-state";
-import { useTicketId } from "@/components/generator/use-ticket-id";
+import { setTicketId, useTicketId } from "@/components/generator/use-ticket-id";
+import { recordTicket, useHistorySaveFailed } from "@/components/generator/use-ticket-history";
+import { type Ticket as TicketSnapshot } from "@/lib/ticket-history";
 import { attendeeInfoSchema, eventInfoSchema } from "@/lib/ticket-schema";
 import { type TemplateId } from "@/lib/ticket-templates";
 
@@ -52,6 +55,10 @@ function Generator({ initialState, restored }: GeneratorProps) {
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [exportState, setExportState] = useState<ExportState>({ status: "idle" });
   const saveFailed = useSaveFailed();
+  const historySaveFailed = useHistorySaveFailed();
+  // Remounts the form and branding panels on reopen so their local state starts fresh.
+  const [reopenCount, setReopenCount] = useState(0);
+  const [reopenedId, setReopenedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!restored) return;
@@ -73,25 +80,48 @@ function Generator({ initialState, restored }: GeneratorProps) {
       return;
     }
 
+    // Taken now, so edits made while the export runs stay out of this ticket.
+    const snapshot: TicketSnapshot = {
+      id: ticketId,
+      createdAt: new Date().toISOString(),
+      templateId,
+      event: values.event,
+      attendee: values.attendee,
+      branding,
+    };
+
     setExportState({ status: "exporting", format });
     try {
       const response = await fetch(`/api/export/${format}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          event: values.event,
-          attendee: values.attendee,
-          ticketId,
-          templateId,
-          branding,
+          event: snapshot.event,
+          attendee: snapshot.attendee,
+          ticketId: snapshot.id,
+          templateId: snapshot.templateId,
+          branding: snapshot.branding,
         }),
       });
       if (!response.ok) throw new Error(`${format} export failed with ${response.status}`);
-      saveBlob(await response.blob(), `ticket-${ticketId}.${format}`);
+      saveBlob(await response.blob(), `ticket-${snapshot.id}.${format}`);
       setExportState({ status: "idle" });
     } catch {
       setExportState({ status: "error", format });
+      return;
     }
+    recordTicket(snapshot);
+  }
+
+  function reopenTicket(ticket: TicketSnapshot) {
+    setValues({ event: ticket.event, attendee: ticket.attendee });
+    setTemplateId(ticket.templateId);
+    setBranding(ticket.branding);
+    setTicketId(ticket.id);
+    setShowAllErrors(false);
+    setExportState({ status: "idle" });
+    setReopenCount((count) => count + 1);
+    setReopenedId(ticket.id);
   }
 
   const isExporting = exportState.status === "exporting";
@@ -109,6 +139,12 @@ function Generator({ initialState, restored }: GeneratorProps) {
         <div className="ml-auto flex items-center gap-3">
           <p role="status" className="text-xs text-muted-foreground">
             {saveFailed && "Couldn't save your changes in this browser."}
+          </p>
+          <p role="status" className="sr-only">
+            {reopenedId && `Reopened ticket ${reopenedId}`}
+          </p>
+          <p role="status" className="text-xs text-muted-foreground">
+            {historySaveFailed && "Couldn't save this ticket to history."}
           </p>
           <p role="status" className="text-xs text-danger">
             {exportState.status === "error" &&
@@ -137,15 +173,17 @@ function Generator({ initialState, restored }: GeneratorProps) {
 
       <div className="grid min-h-0 grid-cols-[380px_1fr]">
         <aside className="overflow-y-auto border-r border-border bg-surface">
-          <TicketForm values={values} onChange={setValues} showAllErrors={showAllErrors} />
+          <TicketForm key={reopenCount} values={values} onChange={setValues} showAllErrors={showAllErrors} />
           <TemplatePicker value={templateId} onChange={setTemplateId} />
           <BrandingPanel
+            key={reopenCount}
             value={branding}
             onLogoChange={(logo) => setBranding((current) => ({ ...current, logo }))}
             onAccentChange={(accent) =>
               setBranding((current) => ({ ...current, colors: { ...current.colors, accent } }))
             }
           />
+          <TicketHistory onReopen={reopenTicket} />
         </aside>
 
         <main className="grid min-h-0 place-content-center place-items-center gap-4 overflow-auto bg-canvas bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[20px_20px] p-8">

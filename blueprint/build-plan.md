@@ -9,7 +9,7 @@
 - [x] 7. **Template system** - Add multiple ticket designs with a shared theme system and a template picker
 - [x] 8. **Brand customization** - Add logo upload, organizer information, and customizable colors
 - [x] 9. **Local persistence** - Save the user's settings, latest form values, and selected template in local storage
-- [ ] 10. **Ticket history** - Store generated tickets locally and allow users to reopen and regenerate them
+- [x] 10. **Ticket history** - Store generated tickets locally and allow users to reopen and regenerate them
 - [ ] 11. **Input polish** - Add date/time formatting, validation messages, long-name handling, empty states, and other UX improvements
 - [ ] 12. **Responsive UI** - Optimize the generator, preview, customization controls, and history for mobile and desktop
 - [ ] 13. **Production deployment** - Deploy the application to Render and verify PNG/PDF rendering in production

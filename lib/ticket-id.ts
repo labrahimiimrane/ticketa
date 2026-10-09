@@ -13,3 +13,6 @@ export function generateTicketId(
   ).join("");
   return `TKT-${chars.slice(0, 4)}-${chars.slice(4)}`;
 }
+
+/** Matches IDs from `generateTicketId`. */
+export const TICKET_ID_PATTERN = /^TKT-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/;

@@ -26,6 +26,12 @@ function regenerate() {
   listeners.forEach((listener) => listener());
 }
 
+/** Makes `id` the current ticket ID, for example when reopening a saved ticket. */
+export function setTicketId(id: string) {
+  currentId = id;
+  listeners.forEach((listener) => listener());
+}
+
 /** The current ticket ID (null until the browser has one) and a way to replace it. */
 export function useTicketId() {
   const ticketId = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
