@@ -33,3 +33,19 @@ export function formatTicketDate(isoDate: string): string {
   const date = parseIsoDate(isoDate);
   return date ? formatter.format(date) : isoDate;
 }
+
+// Viewer's local time zone: only used by history, which renders after hydration.
+const createdAtFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+/** Formats an ISO datetime as "9 Oct 2026, 14:05" in local time; returns "" when unparseable. */
+export function formatCreatedAt(iso: string): string {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? "" : createdAtFormatter.format(date);
+}

@@ -8,7 +8,9 @@ import {
   metaValue,
   orPlaceholder,
   brandStyle,
+  eventTitleClass,
   ticketArticle,
+  wrapText,
   type TemplateProps,
 } from "@/components/ticket/ticket-parts";
 import { formatTicketDate } from "@/lib/format-ticket-date";
@@ -32,7 +34,9 @@ export default function ClassicTicket({ event, attendee, ticketId, branding }: T
           </span>
         </div>
 
-        <h1 className="mt-5 line-clamp-2 text-[34px] leading-[1.05] font-bold tracking-[-0.03em]">
+        <h1
+          className={`mt-5 line-clamp-2 leading-[1.05] font-bold tracking-[-0.03em] ${wrapText} ${eventTitleClass(event.name, "text-[34px]", "text-[28px]")}`}
+        >
           {orPlaceholder(event.name, "Event name")}
         </h1>
 
@@ -47,7 +51,9 @@ export default function ClassicTicket({ event, attendee, ticketId, branding }: T
           </div>
           <div className="min-w-0">
             <dt className={metaLabel}>Venue</dt>
-            <dd className={metaValue}>{orPlaceholder(event.location, "Venue")}</dd>
+            <dd className={`mt-1 line-clamp-2 text-sm font-semibold ${wrapText}`}>
+              {orPlaceholder(event.location, "Venue")}
+            </dd>
           </div>
         </dl>
       </div>
@@ -55,7 +61,7 @@ export default function ClassicTicket({ event, attendee, ticketId, branding }: T
       <div className="flex w-[210px] shrink-0 flex-col items-center justify-between border-l-2 border-dashed border-ticket-rule px-[22px] py-6">
         <div className="w-full text-center">
           <p className={metaLabel}>Attendee</p>
-          <p className="mt-1 truncate text-[15px] font-semibold">
+          <p className={`mt-1 line-clamp-2 text-[15px] font-semibold ${wrapText}`}>
             {orPlaceholder(attendee.name, "Attendee name")}
           </p>
         </div>

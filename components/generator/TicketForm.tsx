@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { z } from "zod";
 
 import { Input } from "@/components/ui/input";
@@ -16,9 +16,23 @@ type FieldKey = `${Section}.${string}`;
 type TicketFormProps = {
   values: TicketFormValues;
   onChange: (values: TicketFormValues) => void;
-  /** Show every field's error as if touched, for example after a blocked export. */
-  showAllErrors?: boolean;
+  /** Blocked exports so far. Above 0, every error shows as if touched; each new
+      one moves focus to the first invalid field. */
+  blockedAttempts?: number;
 };
+
+// Form order, for focusing the first invalid field.
+const FIELD_ORDER: FieldKey[] = [
+  "event.name",
+  "event.date",
+  "event.time",
+  "event.location",
+  "event.organizer",
+  "attendee.name",
+  "attendee.email",
+];
+
+const fieldId = (key: FieldKey) => `field-${key.replace(".", "-")}`;
 
 function firstErrors(
   section: Section,
@@ -33,13 +47,27 @@ function firstErrors(
   return errors;
 }
 
-export default function TicketForm({ values, onChange, showAllErrors = false }: TicketFormProps) {
-  const [touched, setTouched] = useState<Set<FieldKey>>(() => new Set());
-
-  const errors = new Map([
+/** First error per invalid field, keyed like "event.name". */
+export function formErrors(values: TicketFormValues): Map<FieldKey, string> {
+  return new Map([
     ...firstErrors("event", eventInfoSchema.safeParse(values.event)),
     ...firstErrors("attendee", attendeeInfoSchema.safeParse(values.attendee)),
   ]);
+}
+
+export default function TicketForm({ values, onChange, blockedAttempts = 0 }: TicketFormProps) {
+  const [touched, setTouched] = useState<Set<FieldKey>>(() => new Set());
+  const showAllErrors = blockedAttempts > 0;
+
+  const errors = formErrors(values);
+
+  // Keyed on the attempt count only: focus moves once per blocked export, not on every edit.
+  useEffect(() => {
+    if (blockedAttempts === 0) return;
+    const first = FIELD_ORDER.find((key) => errors.has(key));
+    if (first) document.getElementById(fieldId(first))?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blockedAttempts]);
 
   function field<S extends Section>(
     section: S,
@@ -49,7 +77,7 @@ export default function TicketForm({ values, onChange, showAllErrors = false }: 
     optional = false,
   ) {
     const key: FieldKey = `${section}.${name}`;
-    const id = `field-${section}-${name}`;
+    const id = fieldId(key);
     const errorId = `${id}-error`;
     const error = showAllErrors || touched.has(key) ? errors.get(key) : undefined;
     const value = (values[section][name] as string | undefined) ?? "";
@@ -63,6 +91,7 @@ export default function TicketForm({ values, onChange, showAllErrors = false }: 
         <Input
           id={id}
           value={value}
+          aria-required={optional ? undefined : true}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           onChange={(e) =>

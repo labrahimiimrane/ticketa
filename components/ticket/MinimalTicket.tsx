@@ -7,7 +7,9 @@ import {
   metaLabel,
   orPlaceholder,
   brandStyle,
+  eventTitleClass,
   ticketArticle,
+  wrapText,
   type TemplateProps,
 } from "@/components/ticket/ticket-parts";
 import { formatTicketDate } from "@/lib/format-ticket-date";
@@ -23,7 +25,9 @@ export default function MinimalTicket({ event, attendee, ticketId, branding }: T
           {orPlaceholder(event.organizer, "Organizer")}
         </p>
       </div>
-      <h1 className="mt-3 line-clamp-2 text-[34px] leading-[1.05] font-bold tracking-[-0.03em]">
+      <h1
+        className={`mt-3 line-clamp-2 leading-[1.05] font-bold tracking-[-0.03em] ${wrapText} ${eventTitleClass(event.name, "text-[34px]", "text-[28px]")}`}
+      >
         {orPlaceholder(event.name, "Event name")}
       </h1>
       <div aria-hidden className="mt-3 h-0.5 w-12 shrink-0 bg-ticket-accent" />
@@ -38,7 +42,7 @@ export default function MinimalTicket({ event, attendee, ticketId, branding }: T
       <div className="mt-auto flex items-end justify-between gap-6">
         <div className="min-w-0">
           <p className={metaLabel}>Attendee</p>
-          <p className="mt-1 truncate text-[15px] font-semibold">
+          <p className={`mt-1 line-clamp-2 text-[15px] font-semibold ${wrapText}`}>
             {orPlaceholder(attendee.name, "Attendee name")}
           </p>
         </div>

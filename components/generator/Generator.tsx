@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import BrandingPanel from "@/components/generator/BrandingPanel";
 import TemplatePicker from "@/components/generator/TemplatePicker";
 import TicketHistory from "@/components/generator/TicketHistory";
-import TicketForm, { type TicketFormValues } from "@/components/generator/TicketForm";
+import TicketForm, { formErrors, type TicketFormValues } from "@/components/generator/TicketForm";
 import Ticket from "@/components/ticket/Ticket";
 import { type Branding } from "@/lib/branding";
 import { DEFAULT_LOCAL_STATE, type LocalState } from "@/lib/local-state";
@@ -13,7 +13,6 @@ import { saveState, useSavedState, useSaveFailed } from "@/components/generator/
 import { setTicketId, useTicketId } from "@/components/generator/use-ticket-id";
 import { recordTicket, useHistorySaveFailed } from "@/components/generator/use-ticket-history";
 import { type Ticket as TicketSnapshot } from "@/lib/ticket-history";
-import { attendeeInfoSchema, eventInfoSchema } from "@/lib/ticket-schema";
 import { type TemplateId } from "@/lib/ticket-templates";
 
 type ExportFormat = "png" | "pdf";
@@ -52,7 +51,7 @@ function Generator({ initialState, restored }: GeneratorProps) {
   const [ticketId, regenerateTicketId] = useTicketId();
   const [templateId, setTemplateId] = useState<TemplateId>(initialState.selectedTemplateId);
   const [branding, setBranding] = useState<Branding>(initialState.branding);
-  const [showAllErrors, setShowAllErrors] = useState(false);
+  const [blockedAttempts, setBlockedAttempts] = useState(0);
   const [exportState, setExportState] = useState<ExportState>({ status: "idle" });
   const saveFailed = useSaveFailed();
   const historySaveFailed = useHistorySaveFailed();
@@ -72,11 +71,8 @@ function Generator({ initialState, restored }: GeneratorProps) {
 
   async function exportTicket(format: ExportFormat) {
     setExportState({ status: "idle" });
-    const isValid =
-      eventInfoSchema.safeParse(values.event).success &&
-      attendeeInfoSchema.safeParse(values.attendee).success;
-    if (!isValid || !ticketId) {
-      setShowAllErrors(true);
+    if (formErrors(values).size > 0 || !ticketId) {
+      setBlockedAttempts((count) => count + 1);
       return;
     }
 
@@ -118,13 +114,17 @@ function Generator({ initialState, restored }: GeneratorProps) {
     setTemplateId(ticket.templateId);
     setBranding(ticket.branding);
     setTicketId(ticket.id);
-    setShowAllErrors(false);
+    setBlockedAttempts(0);
     setExportState({ status: "idle" });
     setReopenCount((count) => count + 1);
     setReopenedId(ticket.id);
   }
 
   const isExporting = exportState.status === "exporting";
+  const invalidCount = formErrors(values).size;
+  const isBlank = [...Object.values(values.event), ...Object.values(values.attendee)].every(
+    (value) => !value?.trim(),
+  );
 
   return (
     <div className="grid h-dvh grid-rows-[52px_1fr]">
@@ -145,6 +145,11 @@ function Generator({ initialState, restored }: GeneratorProps) {
           </p>
           <p role="status" className="text-xs text-muted-foreground">
             {historySaveFailed && "Couldn't save this ticket to history."}
+          </p>
+          <p role="alert" className="text-xs text-danger">
+            {blockedAttempts > 0 &&
+              invalidCount > 0 &&
+              `Fix ${invalidCount} ${invalidCount === 1 ? "field" : "fields"} before downloading.`}
           </p>
           <p role="status" className="text-xs text-danger">
             {exportState.status === "error" &&
@@ -173,7 +178,7 @@ function Generator({ initialState, restored }: GeneratorProps) {
 
       <div className="grid min-h-0 grid-cols-[380px_1fr]">
         <aside className="overflow-y-auto border-r border-border bg-surface">
-          <TicketForm key={reopenCount} values={values} onChange={setValues} showAllErrors={showAllErrors} />
+          <TicketForm key={reopenCount} values={values} onChange={setValues} blockedAttempts={blockedAttempts} />
           <TemplatePicker value={templateId} onChange={setTemplateId} />
           <BrandingPanel
             key={reopenCount}
@@ -190,6 +195,9 @@ function Generator({ initialState, restored }: GeneratorProps) {
           <div className="drop-shadow-ticket">
             <Ticket templateId={templateId} event={values.event} attendee={values.attendee} ticketId={ticketId} branding={branding} />
           </div>
+          {isBlank && (
+            <p className="text-sm text-muted-foreground">Fill in the event details to build your ticket.</p>
+          )}
           <button
             type="button"
             onClick={regenerateTicketId}

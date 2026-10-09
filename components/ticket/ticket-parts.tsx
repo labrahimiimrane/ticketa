@@ -47,6 +47,17 @@ export const metaLabel =
   "font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-ticket-muted";
 export const metaValue = "mt-1 truncate text-sm font-semibold";
 
+/** Lets unbroken user text (a long word or URL) wrap inside its box. */
+export const wrapText = "[overflow-wrap:anywhere]";
+
+export const LONG_TITLE_CHARS = 40;
+
+/** Picks the title size from the name length, so preview and export always agree.
+    Pass full literal class names; Tailwind cannot see built ones. */
+export function eventTitleClass(name: string, normal: string, long: string) {
+  return name.trim().length > LONG_TITLE_CHARS ? long : normal;
+}
+
 export function orPlaceholder(
   value: string,
   placeholder: string,

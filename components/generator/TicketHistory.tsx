@@ -1,6 +1,7 @@
 "use client";
 
 import { removeHistoryTicket, useTicketHistory } from "@/components/generator/use-ticket-history";
+import { formatCreatedAt, formatTicketDate } from "@/lib/format-ticket-date";
 import { type Ticket } from "@/lib/ticket-history";
 
 type TicketHistoryProps = {
@@ -36,7 +37,11 @@ export default function TicketHistory({ onReopen }: TicketHistoryProps) {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm">{ticket.attendee.name}</p>
                   <p className="truncate text-xs text-muted-foreground">{ticket.event.name}</p>
-                  <p className="font-mono text-[11px] text-faint">{ticket.id}</p>
+                  <p className="text-xs text-muted-foreground">{formatTicketDate(ticket.event.date)}</p>
+                  <p className="font-mono text-[11px] text-faint">
+                    {ticket.id} ·{" "}
+                    <time dateTime={ticket.createdAt}>Created {formatCreatedAt(ticket.createdAt)}</time>
+                  </p>
                 </div>
                 <button type="button" onClick={() => onReopen(ticket)} aria-label={`Reopen ${label}`} className={smallButton}>
                   Reopen

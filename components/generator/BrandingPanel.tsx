@@ -115,6 +115,9 @@ export default function BrandingPanel({ value, onLogoChange, onAccentChange }: B
                 <p className="truncate text-sm">{logoFile.name}</p>
                 <p className="font-mono text-xs text-faint">{formatKilobytes(logoFile.size)}</p>
               </>
+            ) : value.logo ? (
+              // Restored from storage or reopened from history: no file details.
+              <p className="text-sm">Saved logo</p>
             ) : (
               <p className="text-xs text-faint">PNG, JPEG, WebP, or SVG up to 256 KB</p>
             )}

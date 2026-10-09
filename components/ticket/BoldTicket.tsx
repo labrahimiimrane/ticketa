@@ -8,7 +8,9 @@ import {
   metaValue,
   orPlaceholder,
   brandStyle,
+  eventTitleClass,
   ticketArticle,
+  wrapText,
   type TemplateProps,
 } from "@/components/ticket/ticket-parts";
 import { formatTicketDate } from "@/lib/format-ticket-date";
@@ -32,7 +34,9 @@ export default function BoldTicket({ event, attendee, ticketId, branding }: Temp
             {orPlaceholder(event.organizer, "Organizer", event.organizer, onAccentPlaceholder)}
           </p>
         </div>
-        <h1 className="line-clamp-2 text-[28px] leading-[1.1] font-bold tracking-[-0.03em]">
+        <h1
+          className={`line-clamp-2 leading-[1.1] font-bold tracking-[-0.03em] ${wrapText} ${eventTitleClass(event.name, "text-[28px]", "text-[24px]")}`}
+        >
           {orPlaceholder(event.name, "Event name", event.name, onAccentPlaceholder)}
         </h1>
       </header>
@@ -50,12 +54,14 @@ export default function BoldTicket({ event, attendee, ticketId, branding }: Temp
             </div>
             <div className="min-w-0">
               <dt className={metaLabel}>Venue</dt>
-              <dd className={metaValue}>{orPlaceholder(event.location, "Venue")}</dd>
+              <dd className={`mt-1 line-clamp-2 text-sm font-semibold ${wrapText}`}>
+                {orPlaceholder(event.location, "Venue")}
+              </dd>
             </div>
           </dl>
           <div className="min-w-0">
             <p className={metaLabel}>Attendee</p>
-            <p className="mt-1 truncate text-[15px] font-semibold">
+            <p className={`mt-1 line-clamp-2 text-[15px] font-semibold ${wrapText}`}>
               {orPlaceholder(attendee.name, "Attendee name")}
             </p>
           </div>
