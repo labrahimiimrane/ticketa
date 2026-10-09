@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import BrandingPanel from "@/components/generator/BrandingPanel";
 import TemplatePicker from "@/components/generator/TemplatePicker";
 import TicketForm, { type TicketFormValues } from "@/components/generator/TicketForm";
 import Ticket from "@/components/ticket/Ticket";
-import { DEFAULT_BRANDING, type Branding } from "@/lib/branding";
+import { type Branding } from "@/lib/branding";
+import { DEFAULT_LOCAL_STATE, type LocalState } from "@/lib/local-state";
+import { saveState, useSavedState, useSaveFailed } from "@/components/generator/use-saved-state";
 import { useTicketId } from "@/components/generator/use-ticket-id";
 import { attendeeInfoSchema, eventInfoSchema } from "@/lib/ticket-schema";
-import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/lib/ticket-templates";
+import { type TemplateId } from "@/lib/ticket-templates";
 
 type ExportFormat = "png" | "pdf";
 
@@ -18,18 +20,48 @@ type ExportState =
   | { status: "exporting"; format: ExportFormat }
   | { status: "error"; format: ExportFormat };
 
-const EMPTY_VALUES: TicketFormValues = {
-  event: { name: "", date: "", time: "", location: "", organizer: "" },
-  attendee: { name: "", email: "" },
+/**
+ * Renders defaults on the server and during hydration, then remounts once with
+ * the state saved in this browser so every control starts from it.
+ */
+export default function SavedGenerator() {
+  const saved = useSavedState();
+  return (
+    <Generator
+      key={saved ? "restored" : "default"}
+      initialState={saved ?? DEFAULT_LOCAL_STATE}
+      restored={saved !== null}
+    />
+  );
+}
+
+type GeneratorProps = {
+  initialState: LocalState;
+  /** False until the saved state is loaded, so defaults never overwrite it. */
+  restored: boolean;
 };
 
-export default function Generator() {
-  const [values, setValues] = useState(EMPTY_VALUES);
+function Generator({ initialState, restored }: GeneratorProps) {
+  const [values, setValues] = useState<TicketFormValues>({
+    event: initialState.lastEvent,
+    attendee: initialState.lastAttendee,
+  });
   const [ticketId, regenerateTicketId] = useTicketId();
-  const [templateId, setTemplateId] = useState<TemplateId>(DEFAULT_TEMPLATE_ID);
-  const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING);
+  const [templateId, setTemplateId] = useState<TemplateId>(initialState.selectedTemplateId);
+  const [branding, setBranding] = useState<Branding>(initialState.branding);
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [exportState, setExportState] = useState<ExportState>({ status: "idle" });
+  const saveFailed = useSaveFailed();
+
+  useEffect(() => {
+    if (!restored) return;
+    saveState({
+      lastEvent: values.event,
+      lastAttendee: values.attendee,
+      branding,
+      selectedTemplateId: templateId,
+    });
+  }, [restored, values, branding, templateId]);
 
   async function exportTicket(format: ExportFormat) {
     setExportState({ status: "idle" });
@@ -75,6 +107,9 @@ export default function Generator() {
         </span>
         <span className="text-base font-semibold tracking-[-0.01em]">Ticketa</span>
         <div className="ml-auto flex items-center gap-3">
+          <p role="status" className="text-xs text-muted-foreground">
+            {saveFailed && "Couldn't save your changes in this browser."}
+          </p>
           <p role="status" className="text-xs text-danger">
             {exportState.status === "error" &&
               `Couldn't create the ${exportState.format.toUpperCase()}. Try again.`}
