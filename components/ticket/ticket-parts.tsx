@@ -1,4 +1,8 @@
+import Image from "next/image";
+import type { CSSProperties } from "react";
+
 import TicketQr from "@/components/ticket/TicketQr";
+import { accentInk, type Branding } from "@/lib/branding";
 import { TICKET_HEIGHT, TICKET_WIDTH } from "@/lib/ticket-templates";
 import type { AttendeeInfo, EventInfo } from "@/types/ticket";
 
@@ -6,7 +10,32 @@ export type TemplateProps = {
   event: EventInfo;
   attendee: AttendeeInfo;
   ticketId: string | null;
+  branding: Branding;
 };
+
+/** Recolors one ticket: every accent use goes through these two theme tokens. */
+export function brandStyle(branding: Branding): CSSProperties {
+  return {
+    "--color-ticket-accent": branding.colors.accent,
+    "--color-ticket-accent-ink": accentInk(branding.colors.accent),
+  } as CSSProperties;
+}
+
+/** The organizer's logo. Decorative: the organizer name sits beside it as text.
+    Rendered as an <img> only, so scripts inside an SVG logo never run. */
+export function TicketLogo({ logo, className }: { logo: string; className: string }) {
+  return (
+    <Image
+      src={logo}
+      alt=""
+      width={96}
+      height={24}
+      unoptimized
+      loading="eager"
+      className={`w-auto shrink-0 object-contain ${className}`}
+    />
+  );
+}
 
 /** Every template's root: a TICKET_WIDTH x TICKET_HEIGHT paper card that exports
     select by `article`. Tailwind only sees literal class names, so the size is

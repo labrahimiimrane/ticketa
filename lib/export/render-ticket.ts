@@ -74,5 +74,6 @@ async function openTicketPage(browser: Browser, data: ExportRequest): Promise<Pa
   await page.evaluate((ticket) => window.__renderTicket?.(ticket), data);
   await page.waitForSelector('[data-ready="true"] article');
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await page.waitForFunction(() => [...document.images].every((image) => image.complete));
   return page;
 }

@@ -1,23 +1,28 @@
 import {
   CutLine,
   ROUNDED_CUT_LINE,
+  TicketLogo,
   TicketIdText,
   TicketQrSlot,
   metaLabel,
   orPlaceholder,
+  brandStyle,
   ticketArticle,
   type TemplateProps,
 } from "@/components/ticket/ticket-parts";
 import { formatTicketDate } from "@/lib/format-ticket-date";
 
-export default function MinimalTicket({ event, attendee, ticketId }: TemplateProps) {
+export default function MinimalTicket({ event, attendee, ticketId, branding }: TemplateProps) {
   return (
-    <article className={`flex flex-col px-10 py-7 ${ticketArticle}`}>
+    <article className={`flex flex-col px-10 py-7 ${ticketArticle}`} style={brandStyle(branding)}>
       <CutLine path={ROUNDED_CUT_LINE} />
 
-      <p className="truncate text-xs font-medium text-ticket-muted">
-        {orPlaceholder(event.organizer, "Organizer")}
-      </p>
+      <div className="flex min-w-0 items-center gap-2">
+        {branding.logo && <TicketLogo logo={branding.logo} className="h-6 max-w-24" />}
+        <p className="truncate text-xs font-medium text-ticket-muted">
+          {orPlaceholder(event.organizer, "Organizer")}
+        </p>
+      </div>
       <h1 className="mt-3 line-clamp-2 text-[34px] leading-[1.05] font-bold tracking-[-0.03em]">
         {orPlaceholder(event.name, "Event name")}
       </h1>

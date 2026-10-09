@@ -1,6 +1,7 @@
 import { exportRequestSchema, type ExportRequest } from "@/lib/export/export-request";
 
-const MAX_BODY_BYTES = 32 * 1024;
+// Fits a 256 KB logo after base64 encoding (about 342 KB) plus the ticket JSON.
+const MAX_BODY_BYTES = 512 * 1024;
 
 type ExportFormat = {
   contentType: string;

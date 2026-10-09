@@ -1,27 +1,32 @@
 import {
   CutLine,
   NOTCHED_CUT_LINE,
+  TicketLogo,
   TicketIdText,
   TicketQrSlot,
   metaLabel,
   metaValue,
   orPlaceholder,
+  brandStyle,
   ticketArticle,
   type TemplateProps,
 } from "@/components/ticket/ticket-parts";
 import { formatTicketDate } from "@/lib/format-ticket-date";
 
-export default function ClassicTicket({ event, attendee, ticketId }: TemplateProps) {
+export default function ClassicTicket({ event, attendee, ticketId, branding }: TemplateProps) {
   return (
-    <article className={`ticket-notches flex ${ticketArticle}`}>
+    <article className={`ticket-notches flex ${ticketArticle}`} style={brandStyle(branding)}>
       <CutLine path={NOTCHED_CUT_LINE} />
       <div className="w-2.5 rounded-l-ticket bg-ticket-accent" />
 
       <div className="flex min-w-0 flex-1 flex-col px-8 py-7">
         <div className="flex items-center justify-between gap-4">
-          <p className="truncate text-xs font-semibold text-ticket-muted">
-            {orPlaceholder(event.organizer, "Organizer")}
-          </p>
+          <div className="flex min-w-0 items-center gap-2">
+            {branding.logo && <TicketLogo logo={branding.logo} className="h-6 max-w-24" />}
+            <p className="truncate text-xs font-semibold text-ticket-muted">
+              {orPlaceholder(event.organizer, "Organizer")}
+            </p>
+          </div>
           <span className="shrink-0 rounded-full bg-ticket-accent px-2.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-ticket-accent-ink">
             Admit one
           </span>

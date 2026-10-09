@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 
+import BrandingPanel from "@/components/generator/BrandingPanel";
 import TemplatePicker from "@/components/generator/TemplatePicker";
 import TicketForm, { type TicketFormValues } from "@/components/generator/TicketForm";
 import Ticket from "@/components/ticket/Ticket";
+import { DEFAULT_BRANDING, type Branding } from "@/lib/branding";
 import { useTicketId } from "@/components/generator/use-ticket-id";
 import { attendeeInfoSchema, eventInfoSchema } from "@/lib/ticket-schema";
 import { DEFAULT_TEMPLATE_ID, type TemplateId } from "@/lib/ticket-templates";
@@ -25,6 +27,7 @@ export default function Generator() {
   const [values, setValues] = useState(EMPTY_VALUES);
   const [ticketId, regenerateTicketId] = useTicketId();
   const [templateId, setTemplateId] = useState<TemplateId>(DEFAULT_TEMPLATE_ID);
+  const [branding, setBranding] = useState<Branding>(DEFAULT_BRANDING);
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [exportState, setExportState] = useState<ExportState>({ status: "idle" });
 
@@ -48,6 +51,7 @@ export default function Generator() {
           attendee: values.attendee,
           ticketId,
           templateId,
+          branding,
         }),
       });
       if (!response.ok) throw new Error(`${format} export failed with ${response.status}`);
@@ -100,11 +104,18 @@ export default function Generator() {
         <aside className="overflow-y-auto border-r border-border bg-surface">
           <TicketForm values={values} onChange={setValues} showAllErrors={showAllErrors} />
           <TemplatePicker value={templateId} onChange={setTemplateId} />
+          <BrandingPanel
+            value={branding}
+            onLogoChange={(logo) => setBranding((current) => ({ ...current, logo }))}
+            onAccentChange={(accent) =>
+              setBranding((current) => ({ ...current, colors: { ...current.colors, accent } }))
+            }
+          />
         </aside>
 
         <main className="grid min-h-0 place-content-center place-items-center gap-4 overflow-auto bg-canvas bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[20px_20px] p-8">
           <div className="drop-shadow-ticket">
-            <Ticket templateId={templateId} event={values.event} attendee={values.attendee} ticketId={ticketId} />
+            <Ticket templateId={templateId} event={values.event} attendee={values.attendee} ticketId={ticketId} branding={branding} />
           </div>
           <button
             type="button"
