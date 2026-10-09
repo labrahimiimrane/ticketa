@@ -196,7 +196,7 @@ function Generator({ initialState, restored }: GeneratorProps) {
               setBranding((current) => ({ ...current, colors: { ...current.colors, accent } }))
             }
           />
-          <TicketHistory onReopen={reopenTicket} />
+          <TicketHistory onReopen={reopenTicket} exporting={isExporting} />
         </aside>
 
         <main className="grid flex-1 grid-cols-1 content-center justify-items-center gap-4 bg-canvas bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[20px_20px] px-4 py-8 sm:p-8 lg:min-h-0 lg:overflow-auto">

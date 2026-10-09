@@ -6,13 +6,15 @@ import { type Ticket } from "@/lib/ticket-history";
 
 type TicketHistoryProps = {
   onReopen: (ticket: Ticket) => void;
+  /** Reopen would reset the in-flight export's state, so it waits for the export. */
+  exporting: boolean;
 };
 
 const sectionTitle = "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
 const smallButton =
   "inline-flex h-7 cursor-pointer items-center rounded-md border border-border-strong bg-surface-raised px-2.5 text-xs font-medium text-text hover:border-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
-export default function TicketHistory({ onReopen }: TicketHistoryProps) {
+export default function TicketHistory({ onReopen, exporting }: TicketHistoryProps) {
   const history = useTicketHistory();
 
   return (
@@ -43,7 +45,13 @@ export default function TicketHistory({ onReopen }: TicketHistoryProps) {
                     <time dateTime={ticket.createdAt}>Created {formatCreatedAt(ticket.createdAt)}</time>
                   </p>
                 </div>
-                <button type="button" onClick={() => onReopen(ticket)} aria-label={`Reopen ${label}`} className={smallButton}>
+                <button
+                  type="button"
+                  onClick={() => onReopen(ticket)}
+                  disabled={exporting}
+                  aria-label={`Reopen ${label}`}
+                  className={`${smallButton} disabled:cursor-wait disabled:opacity-70`}
+                >
                   Reopen
                 </button>
                 <button
