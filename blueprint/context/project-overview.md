@@ -1,6 +1,6 @@
 # Ticketa - Project Overview
 
-<!-- blueprint:source-hash f9ac73623eab51dfbf64c8797381d291b483ca6833375bffbd48f38fdefddbb8 -->
+<!-- blueprint:source-hash 2639bb080daca5624f0039507a3a4c2113aa4de60adefe0b36b880b127de53a3 -->
 
 > Turn event and attendee details into a polished, customizable event ticket in
 > seconds, with a live preview and PNG/PDF export. No account required.
@@ -55,7 +55,7 @@ In build-plan order. Headline feature: **3. Live ticket preview** with
     handling, empty states, other UX polish.
 12. **Responsive UI** - generator, preview, customization, and history tuned for
     mobile and desktop.
-13. **Production deployment** - deploy to Render and verify PNG/PDF rendering in
+13. **Production deployment** - deploy to Vercel and verify PNG/PDF rendering in
     production.
 14. **Production hardening** - Puppeteer memory, rendering concurrency, error
     handling, production config.
@@ -122,9 +122,10 @@ downloaded, never stored.
 - **QR code library** - QR generation (> TODO: choose one in feature 4).
 - **Browser `localStorage`** - all v1 persistence.
 - **Puppeteer** - server-side PNG and PDF rendering from the same HTML/CSS
-  templates as the preview.
+  templates as the preview; production uses `puppeteer-core` with a serverless
+  Chromium build.
 - **Self-hosted fonts** - consistent rendering between preview and export.
-- **Render** - hosting.
+- **Vercel** - hosting.
 
 Preview and export must use the same ticket templates so the download matches
 the preview.
@@ -153,10 +154,12 @@ Principle: **what you see in the preview is what you get in the download.**
 
 ## Deployment
 
-- **Host:** Render, Next.js web service, Render-provided domain first.
-- **Build:** `npm run build`. **Start:** `npm run start`.
-- **Server rendering:** a server-side endpoint runs Puppeteer for PNG/PDF; Chrome
-  must be installed or bundled correctly on Render.
+- **Host:** Vercel, Next.js project imported from GitHub, Vercel-provided domain
+  first.
+- **Build:** Next.js production build (Vercel default).
+- **Server rendering:** the export endpoint runs Puppeteer inside a Vercel
+  serverless function; Chrome must fit the function size limit, so production
+  uses `puppeteer-core` with a serverless Chromium build.
 - **Storage:** none server-side (no database, no persistent files).
 - **Env vars:** none required for v1; add only when needed.
 - **Health check:** the main route or a dedicated health endpoint.
