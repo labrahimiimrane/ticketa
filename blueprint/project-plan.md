@@ -82,9 +82,9 @@ Future product data, if Ticketly becomes a cloud product:
 - Zod for input validation
 - QR code generation library
 - Browser local storage for v1 persistence
-- Puppeteer for high-quality PNG and PDF rendering
+- Puppeteer (puppeteer-core with a serverless Chromium build in production) for high-quality PNG and PDF rendering
 - Self-hosted fonts for consistent ticket rendering
-- Render for deployment
+- Vercel for deployment
 
 The browser preview and exported files should use the same HTML/CSS ticket templates so the generated ticket matches the preview as closely as possible.
 
@@ -145,17 +145,14 @@ The main principle is:
 
 ## 8. Deployment - Where and how will this ship?
 
-The application will be deployed as a Next.js web service on Render.
+The application will be deployed as a Next.js project on Vercel, imported from the GitHub repository.
 
 Application type:
-- Next.js web service
-- Server-side rendering endpoint for PNG/PDF generation
+- Next.js project on Vercel
+- Server-side rendering endpoint for PNG/PDF generation, running as a Vercel serverless function
 
 Build:
-- Next.js production build
-
-Start:
-- Next.js production server
+- Next.js production build (Vercel's default)
 
 Environment variables:
 - Only add environment variables when required by the deployment or future integrations
@@ -167,14 +164,14 @@ Storage:
 - No persistent server-side file storage
 
 Rendering:
-- Puppeteer runs on the Render server for PNG and PDF generation
-- Chrome should be installed/bundled correctly for the production environment
+- Puppeteer runs inside the Vercel function for PNG and PDF generation
+- Chrome must fit the serverless function size limit, so production uses puppeteer-core with a serverless Chromium build
 
 Health check:
 - Use the main application route or a dedicated health endpoint
 
 Domain:
-- Start with the Render-provided domain
+- Start with the Vercel-provided domain
 - Add a custom domain later if the project becomes a public product
 
 ## 9. Usage model and constraints

@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: ticketa
-    runtime: node
-    plan: free
-    buildCommand: npm ci && npm run build
-    startCommand: npm run start
-    healthCheckPath: /

@@ -1,15 +1,40 @@
-import puppeteer, { type Browser, type Page } from "puppeteer";
+import chromium from "@sparticuz/chromium";
+import puppeteerCore, { type Browser, type Page } from "puppeteer-core";
 
 import type { ExportRequest } from "@/lib/export/export-request";
 
 const TIMEOUT_MS = 20_000;
 const SCALE = 3;
 
-// Always a fixed local origin, never the request's Host header, so callers
-// cannot point the server's browser at another site.
+// Always fixed server configuration, never the request's Host header, so callers
+// cannot point the server's browser at another site. On Vercel there is no local
+// server, so the function loads the deployment's own public URL instead.
 function renderOrigin(): string {
-  return new URL(process.env.RENDER_ORIGIN ?? `http://127.0.0.1:${process.env.PORT ?? 3000}`)
-    .origin;
+  const { RENDER_ORIGIN, VERCEL_ENV, VERCEL_PROJECT_PRODUCTION_URL, VERCEL_URL, PORT } =
+    process.env;
+  const origin =
+    RENDER_ORIGIN ??
+    (VERCEL_ENV === "production" && VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${VERCEL_PROJECT_PRODUCTION_URL}`
+      : VERCEL_URL
+        ? `https://${VERCEL_URL}`
+        : `http://127.0.0.1:${PORT ?? 3000}`);
+  return new URL(origin).origin;
+}
+
+// Vercel functions cannot fit Puppeteer's Chrome, so they use the serverless
+// Chromium build; local runs use the Chrome that the `puppeteer` dev package installs.
+async function launchBrowser(): Promise<Browser> {
+  if (process.env.VERCEL) {
+    return puppeteerCore.launch({
+      executablePath: await chromium.executablePath(),
+      args: chromium.args,
+      headless: true,
+      timeout: TIMEOUT_MS,
+    });
+  }
+  const { default: puppeteer } = await import("puppeteer");
+  return puppeteer.launch({ headless: true, timeout: TIMEOUT_MS });
 }
 
 /** Renders the ticket with the app's own render page and returns PNG bytes at 3x. */
@@ -38,7 +63,7 @@ async function withRenderedTicket<T>(
   const deadline = new Promise<never>((_, reject) => {
     timer = setTimeout(() => reject(new Error(`${format} render timed out`)), TIMEOUT_MS);
   });
-  const launching = puppeteer.launch({ headless: true, timeout: TIMEOUT_MS });
+  const launching = launchBrowser();
   const rendering = launching.then((browser) => openTicketPage(browser, data)).then(use);
 
   try {

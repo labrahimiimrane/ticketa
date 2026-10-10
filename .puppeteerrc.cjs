@@ -1,8 +1,8 @@
 /**
- * Keeps Puppeteer's Chrome inside the project. Render runs the build and the
- * service from this directory, but does not keep ~/.cache between them.
+ * Vercel runs exports on the serverless Chromium build, so its builds skip
+ * Puppeteer's Chrome download. Local installs still get Chrome for development.
  * @type {import("puppeteer").Configuration}
  */
 module.exports = {
-  cacheDirectory: `${__dirname}/.cache/puppeteer`,
+  skipDownload: Boolean(process.env.VERCEL),
 };

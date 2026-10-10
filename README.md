@@ -31,19 +31,21 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy
 
-Ticketa runs on [Render](https://render.com) as one Node web service, defined in
-`render.yaml`. Puppeteer downloads Chrome into `.cache/puppeteer` during
-`npm ci` (see `.puppeteerrc.cjs`), so the browser built on Render is still there
-when the service starts. No environment variables are needed.
+Ticketa deploys to [Vercel](https://vercel.com) as a Next.js project. PNG and PDF
+export run Puppeteer inside a Vercel function using the serverless Chromium build
+from `@sparticuz/chromium`; Vercel builds skip Puppeteer's own Chrome download
+(see `.puppeteerrc.cjs`). No environment variables are needed.
 
-1. Push the repository to GitHub, GitLab, or Bitbucket.
-2. In the Render dashboard choose **New > Blueprint**, select the repository, and
-   apply `render.yaml`.
-3. Wait for the deploy to finish, then run the smoke checks below against the
-   service URL.
+1. In the Vercel dashboard choose **Add New > Project** and import
+   `labrahimiimrane/ticketa`. The Next.js framework preset and build settings are
+   detected automatically.
+2. Export loads the deployment's own `/render/ticket` page, so the deployment must
+   be publicly reachable. Preview deployments are behind Vercel Authentication by
+   default; turn it off in **Settings > Deployment Protection** to test previews.
+3. When the deployment is ready, run the smoke checks below against its URL.
 
 ```bash
-URL=https://<your-service>.onrender.com
+URL=https://<your-deployment>.vercel.app
 BODY='{"event":{"name":"Launch Night","date":"2026-11-20","time":"19:30","location":"Main Hall","organizer":"Ticketa"},"attendee":{"name":"Sam Lee"},"ticketId":"TKT-ABCD-2345","templateId":"classic","branding":{"logo":null,"colors":{"accent":"#8B5CF6"}}}'
 
 curl -s -o /dev/null -w "GET / %{http_code}\n" "$URL/"
