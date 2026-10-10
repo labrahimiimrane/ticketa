@@ -19,6 +19,8 @@ export type Ticket = {
 
 export const TICKET_HISTORY_KEY = "ticketa:history";
 const TICKET_HISTORY_VERSION = 1;
+/** Entries can carry a logo of a few hundred KB, so history stays well inside the storage quota. */
+export const MAX_HISTORY_TICKETS = 20;
 
 // The export endpoint's rules without its text length limits (see ticket-schema).
 const ticketSchema = z.object({
@@ -59,13 +61,14 @@ export function parseTicketHistory(raw: string | null): Ticket[] {
   return tickets;
 }
 
-/** Puts the ticket first, replacing any entry with its ID but keeping that entry's `createdAt`. */
+/** Puts the ticket first, replacing any entry with its ID but keeping that entry's
+    `createdAt`, then keeps only the newest `MAX_HISTORY_TICKETS`. */
 export function upsertTicket(history: Ticket[], ticket: Ticket): Ticket[] {
   const existing = history.find((entry) => entry.id === ticket.id);
   return [
     existing ? { ...ticket, createdAt: existing.createdAt } : ticket,
     ...history.filter((entry) => entry.id !== ticket.id),
-  ];
+  ].slice(0, MAX_HISTORY_TICKETS);
 }
 
 export function removeTicket(history: Ticket[], id: string): Ticket[] {
