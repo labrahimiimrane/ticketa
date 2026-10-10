@@ -5,7 +5,12 @@ import type { z } from "zod";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { attendeeInfoSchema, eventInfoSchema } from "@/lib/ticket-schema";
+import {
+  attendeeInfoSchema,
+  eventInfoSchema,
+  MAX_EMAIL_LENGTH,
+  MAX_TEXT_LENGTH,
+} from "@/lib/ticket-schema";
 import type { AttendeeInfo, EventInfo } from "@/types/ticket";
 
 export type TicketFormValues = { event: EventInfo; attendee: AttendeeInfo };
@@ -119,21 +124,21 @@ export default function TicketForm({ values, onChange, blockedAttempts = 0 }: Ti
         <h2 id="form-event" className={sectionTitle}>
           Event
         </h2>
-        {field("event", "name", "Event name")}
+        {field("event", "name", "Event name", { maxLength: MAX_TEXT_LENGTH })}
         <div className="grid grid-cols-2 gap-3">
           {field("event", "date", "Date", { type: "date" })}
           {field("event", "time", "Time", { type: "time" })}
         </div>
-        {field("event", "location", "Location")}
-        {field("event", "organizer", "Organizer")}
+        {field("event", "location", "Location", { maxLength: MAX_TEXT_LENGTH })}
+        {field("event", "organizer", "Organizer", { maxLength: MAX_TEXT_LENGTH })}
       </section>
 
       <section aria-labelledby="form-attendee" className="flex flex-col gap-3 border-b border-border p-4">
         <h2 id="form-attendee" className={sectionTitle}>
           Attendee
         </h2>
-        {field("attendee", "name", "Full name", { autoComplete: "name" })}
-        {field("attendee", "email", "Email", { type: "email", autoComplete: "email" }, true)}
+        {field("attendee", "name", "Full name", { autoComplete: "name", maxLength: MAX_TEXT_LENGTH })}
+        {field("attendee", "email", "Email", { type: "email", autoComplete: "email", maxLength: MAX_EMAIL_LENGTH }, true)}
       </section>
     </div>
   );

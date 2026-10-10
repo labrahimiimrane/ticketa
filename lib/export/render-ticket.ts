@@ -5,6 +5,17 @@ import type { ExportRequest } from "@/lib/export/export-request";
 
 const TIMEOUT_MS = 20_000;
 const SCALE = 3;
+// One instance can serve several requests at once, and each render runs its own
+// Chrome, so this caps live Chrome processes per instance.
+const MAX_CONCURRENT_RENDERS = 2;
+
+let activeRenders = 0;
+
+/** All render slots on this instance are taken; the caller should retry later. */
+export class RenderBusyError extends Error {}
+
+/** The render missed its deadline. */
+export class RenderTimeoutError extends Error {}
 
 // Always fixed server configuration, never the request's Host header, so callers
 // cannot point the server's browser at another site. On Vercel there is no local
@@ -58,10 +69,16 @@ async function withRenderedTicket<T>(
   format: string,
   use: (page: Page) => Promise<T>,
 ): Promise<T> {
+  if (activeRenders >= MAX_CONCURRENT_RENDERS) throw new RenderBusyError(`${format} render busy`);
+  activeRenders += 1;
+
   // The deadline covers launching Chrome too, not just the page work.
   let timer: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error(`${format} render timed out`)), TIMEOUT_MS);
+    timer = setTimeout(
+      () => reject(new RenderTimeoutError(`${format} render timed out`)),
+      TIMEOUT_MS,
+    );
   });
   const launching = launchBrowser();
   const rendering = launching.then((browser) => openTicketPage(browser, data)).then(use);
@@ -72,12 +89,17 @@ async function withRenderedTicket<T>(
     clearTimeout(timer);
     // A failure after the deadline has already been answered as a timeout.
     rendering.catch(() => {});
-    // Close in the background so a slow close never delays the response.
-    launching.then(
-      (browser) =>
-        browser.close().catch((error) => console.error("Closing export browser failed", error)),
-      () => {},
-    );
+    // Close in the background so a slow close never delays the response. The slot
+    // stays taken until Chrome is gone, so a burst cannot stack extra processes.
+    launching
+      .then(
+        (browser) =>
+          browser.close().catch((error) => console.error("Closing export browser failed", error)),
+        () => {},
+      )
+      .finally(() => {
+        activeRenders -= 1;
+      });
   }
 }
 

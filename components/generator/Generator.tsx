@@ -21,7 +21,7 @@ type ExportFormat = "png" | "pdf";
 type ExportState =
   | { status: "idle" }
   | { status: "exporting"; format: ExportFormat }
-  | { status: "error"; format: ExportFormat };
+  | { status: "error"; format: ExportFormat; busy: boolean };
 
 /**
  * Renders defaults on the server and during hydration, then remounts once with
@@ -101,11 +101,15 @@ function Generator({ initialState, restored }: GeneratorProps) {
           branding: snapshot.branding,
         }),
       });
+      if (response.status === 503) {
+        setExportState({ status: "error", format, busy: true });
+        return;
+      }
       if (!response.ok) throw new Error(`${format} export failed with ${response.status}`);
       saveBlob(await response.blob(), `ticket-${snapshot.id}.${format}`);
       setExportState({ status: "idle" });
     } catch {
-      setExportState({ status: "error", format });
+      setExportState({ status: "error", format, busy: false });
       return;
     }
     recordTicket(snapshot);
@@ -159,7 +163,9 @@ function Generator({ initialState, restored }: GeneratorProps) {
           </p>
           <p role="status" className="text-xs text-danger">
             {exportState.status === "error" &&
-              `Couldn't create the ${exportState.format.toUpperCase()}. Try again.`}
+              (exportState.busy
+                ? "Export is busy right now. Try again in a few seconds."
+                : `Couldn't create the ${exportState.format.toUpperCase()}. Try again.`)}
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2 lg:ml-0 lg:gap-3">

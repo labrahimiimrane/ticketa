@@ -13,7 +13,7 @@
 - [x] 11. **Input polish** - Add date/time formatting, validation messages, long-name handling, empty states, and other UX improvements
 - [x] 12. **Responsive UI** - Optimize the generator, preview, customization controls, and history for mobile and desktop
 - [x] 13. **Production deployment** - Deploy the application to Vercel and verify PNG/PDF rendering in production
-- [ ] 14. **Production hardening** - Check Puppeteer memory usage, rendering concurrency, error handling, and production configuration
+- [x] 14. **Production hardening** - Check Puppeteer memory usage, rendering concurrency, error handling, and production configuration
 
 ## Later - Not v1
 

@@ -56,3 +56,14 @@ curl -s -o ticket.pdf -w "PDF %{http_code} %{content_type}\n" -H "Content-Type: 
 Expect `200` for all three, `image/png` and `application/pdf` content types, and
 files that open and match the preview. To try it locally, run `npm run build`
 and `npm run start`, then use `URL=http://localhost:3000`.
+
+Each server instance renders at most two tickets at once. Extra requests get
+`503` with `{"error":"busy"}` and `Retry-After: 5`, and a render that misses its
+20-second deadline gets `504` with `{"error":"render_timeout"}`. To check the
+limit, send a burst and expect at most two `200` per instance:
+
+```bash
+for i in 1 2 3 4; do
+  curl -s -o /dev/null -w "PNG %{http_code}\n" -H "Content-Type: application/json" -d "$BODY" "$URL/api/export/png" &
+done; wait
+```

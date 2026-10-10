@@ -1,4 +1,5 @@
 import { exportRequestSchema, type ExportRequest } from "@/lib/export/export-request";
+import { RenderBusyError, RenderTimeoutError } from "@/lib/export/render-ticket";
 
 // Fits a 256 KB logo after base64 encoding (about 342 KB) plus the ticket JSON.
 const MAX_BODY_BYTES = 512 * 1024;
@@ -60,6 +61,16 @@ export async function handleExport(
       },
     });
   } catch (error) {
+    if (error instanceof RenderBusyError) {
+      return Response.json(
+        { error: "busy" },
+        { status: 503, headers: { "Retry-After": "5", "Cache-Control": "no-store" } },
+      );
+    }
+    if (error instanceof RenderTimeoutError) {
+      console.error(`${extension.toUpperCase()} export timed out`, error);
+      return Response.json({ error: "render_timeout" }, { status: 504 });
+    }
     console.error(`${extension.toUpperCase()} export failed`, error);
     return Response.json({ error: "render_failed" }, { status: 500 });
   }
