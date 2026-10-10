@@ -39,7 +39,7 @@ Your data is saved only in your browser. There is no database and no sign-up.
 - **Unique ticket IDs and QR codes.** Each ticket gets an ID such as `TKT-ABCD-2345`, encoded as a crisp SVG QR code. You can generate a new ID at any time.
 - **PNG export.** A transparent-background PNG at 3× scale.
 - **PDF export.** The ticket at true size, centered on a single A4 landscape page.
-- **Ticket history.** Every exported ticket is saved locally, so you can reopen it, edit it, and export it again.
+- **Ticket history.** Your 20 most recent exported tickets are saved locally, so you can reopen them, edit them, and export them again. The oldest is removed when a new one is added.
 - **Local persistence.** Your latest form values, branding, and template survive page reloads, using `localStorage`.
 - **Validation.** Inline, accessible error messages, with date/time formatting and length limits (120 characters per text field, 254 for email).
 - **Responsive UI.** A stacked layout on mobile and a side-by-side editor and preview on desktop.
