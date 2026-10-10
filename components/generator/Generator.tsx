@@ -192,10 +192,10 @@ function Generator({ initialState, restored }: GeneratorProps) {
 
       <div className="flex flex-1 flex-col lg:grid lg:min-h-0 lg:grid-cols-[380px_1fr]">
         <aside className="border-b border-border bg-surface lg:overflow-y-auto lg:border-r lg:border-b-0">
-          <TicketForm key={reopenCount} values={values} onChange={setValues} blockedAttempts={blockedAttempts} />
+          <TicketForm key={`form-${reopenCount}`} values={values} onChange={setValues} blockedAttempts={blockedAttempts} />
           <TemplatePicker value={templateId} onChange={setTemplateId} />
           <BrandingPanel
-            key={reopenCount}
+            key={`branding-${reopenCount}`}
             value={branding}
             onLogoChange={(logo) => setBranding((current) => ({ ...current, logo }))}
             onAccentChange={(accent) =>
