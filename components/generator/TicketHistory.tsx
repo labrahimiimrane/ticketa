@@ -1,5 +1,6 @@
 "use client";
 
+import { sectionTitle, smallButton } from "@/components/generator/panel-styles";
 import { removeHistoryTicket, useTicketHistory } from "@/components/generator/use-ticket-history";
 import { formatCreatedAt, formatTicketDate } from "@/lib/format-ticket-date";
 import { type Ticket } from "@/lib/ticket-history";
@@ -9,10 +10,6 @@ type TicketHistoryProps = {
   /** Reopen would reset the in-flight export's state, so it waits for the export. */
   exporting: boolean;
 };
-
-const sectionTitle = "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
-const smallButton =
-  "inline-flex h-7 cursor-pointer items-center rounded-md border border-border-strong bg-surface-raised px-2.5 text-xs font-medium text-text hover:border-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export default function TicketHistory({ onReopen, exporting }: TicketHistoryProps) {
   const history = useTicketHistory();

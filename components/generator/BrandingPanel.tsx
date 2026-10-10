@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, type ChangeEvent } from "react";
 
+import { sectionTitle, smallButton } from "@/components/generator/panel-styles";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,10 +25,6 @@ const TYPE_ERROR = "Use a PNG, JPEG, WebP, or SVG image";
 const SIZE_ERROR = "Choose an image under 256 KB";
 const READ_ERROR = "Couldn't read that file. Try another.";
 const HEX_ERROR = "Enter a hex color like #8B5CF6";
-
-const sectionTitle = "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
-const smallButton =
-  "inline-flex h-7 cursor-pointer items-center rounded-md border border-border-strong bg-surface-raised px-2.5 text-xs font-medium text-text hover:border-faint";
 
 function formatKilobytes(bytes: number) {
   return `${(bytes / 1024).toFixed(1)} KB`;

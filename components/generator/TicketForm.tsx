@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { z } from "zod";
 
+import { sectionTitle } from "@/components/generator/panel-styles";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -143,6 +144,3 @@ export default function TicketForm({ values, onChange, blockedAttempts = 0 }: Ti
     </div>
   );
 }
-
-const sectionTitle =
-  "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
